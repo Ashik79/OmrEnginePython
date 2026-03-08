@@ -24,6 +24,7 @@ def scan_omr():
     UNIVERSAL SHEET: The printed OMR sheet always has 75 bubbles.
     active_q tells the engine how many to evaluate, rest are SKIPPED_INACTIVE.
     """
+    print(f"[*] Received scan request. AI Mode: {request.json.get('use_ai', False)}")
     try:
         data = request.json
         if 'image' not in data:
@@ -34,9 +35,12 @@ def scan_omr():
         if "base64," in image_data:
             image_data = image_data.split("base64,")[1]
 
-        # Get active_q — default to 60 (evaluate all)
+        # Get active_q — default to 60
         active_q = int(data.get('active_q', 60))
-        active_q = max(5, min(60, active_q))   # clamp to valid range
+        active_q = max(5, min(60, active_q))
+        
+        # Get AI flag
+        use_ai = data.get('use_ai', False)
 
         # Decode base64 to numpy array
         nparr = np.frombuffer(base64.b64decode(image_data), np.uint8)
@@ -45,18 +49,29 @@ def scan_omr():
         if img is None:
             return jsonify({"error": "Failed to decode image"}), 400
 
-        # Save temporary file for the engine
+        # Save temporary file for debug if needed
         temp_filename = "temp_scan.jpg"
         cv2.imwrite(temp_filename, img)
 
-        # Run OMR Engine with active_q parameter
-        result = engine.run(temp_filename, active_q=active_q)
+        # Run OMR Engine (AI or Legacy)
+        if use_ai:
+            print("[*] Using AI Engine (YOLOv8)")
+            # In AI mode, we use the new align_sheet_ai + extract_roi_data
+            img_prep, _, _ = engine.preprocess(temp_filename)
+            warped = engine.align_sheet_ai(img_prep)
+            if warped is None:
+                return jsonify({"success": False, "error": "AI could not align sheet"}), 200
+            result, _ = engine.extract_roi_data(warped, active_q=active_q)
+        else:
+            result = engine.run(temp_filename, active_q=active_q)
+            if not result.get('success', False) and 'error' in result:
+                return jsonify({"success": False, "error": result['error']}), 200
 
         return jsonify({
             "success": True,
             "result": result,
             "active_q": active_q,
-            "total_sheet_q": 60
+            "used_ai": use_ai
         })
 
     except Exception as e:

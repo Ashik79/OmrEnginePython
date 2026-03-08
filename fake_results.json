@@ -1,0 +1,367 @@
+{
+    "set": null,
+    "roll": "?123??",
+    "questions": [
+        {
+            "qNum": 1,
+            "detected": "A",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 2,
+            "detected": "B",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 3,
+            "detected": "C",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 4,
+            "detected": "D",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 5,
+            "detected": "A",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 6,
+            "detected": "B",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 7,
+            "detected": "C",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 8,
+            "detected": "D",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 9,
+            "detected": "A",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 10,
+            "detected": "B",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 11,
+            "detected": "C",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 12,
+            "detected": "D",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 13,
+            "detected": null,
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 14,
+            "detected": null,
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 15,
+            "detected": null,
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 16,
+            "detected": null,
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 17,
+            "detected": "D",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 18,
+            "detected": null,
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 19,
+            "detected": "B",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 20,
+            "detected": "C",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 21,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 22,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 23,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 24,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 25,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 26,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 27,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 28,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 29,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 30,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 31,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 32,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 33,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 34,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 35,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 36,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 37,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 38,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 39,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 40,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 41,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 42,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 43,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 44,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 45,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 46,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 47,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 48,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 49,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 50,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 51,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 52,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 53,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 54,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 55,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 56,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 57,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 58,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 59,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 60,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        }
+    ],
+    "roll_crop_base64": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAoHBwgHBgoICAgLCgoLDhgQDg0NDh0VFhEYIx8lJCIfIiEmKzcvJik0KSEiMEExNDk7Pj4+JS5ESUM8SDc9Pjv/2wBDAQoLCw4NDhwQEBw7KCIoOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozv/wAARCADmAXADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD2aiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigDy65+PPh+O4VLfTr+aMSFXk2ouUwcMoLZOTjg44J9MV1HhP4iaB4wcwWE0kV2qljbTrtfAPUYyD+BOO9fLlaHh/UJ9L1+xvreTy5IZ1YNt3Y55478UAfXdLTIpFliWRCSrqGGQRwfY0+gAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD40KlSQwIIOCD2rp/APhS+8TeJLWOGKRbaGRZJ5wOEUH375FfR9x4W8P3U6zz6LYvIshk3GBcliCCTxz1PXPr1q/a2ltZQCC0t4reIHIjiQKo/AUAS0tJS0AFFFFABWXqniTRdEZF1TVLa0aTO0SyAE4xn+Y/Ol8Ram2i+HNQ1NI/Ma0t3lCZxkgZ64r5Ovr661K9mvb2d57iZt0kjnJY/57UAfU2leNvDetSRxWOsW0k0i7hEXw+PcGt2vjRWKsGUkEHII7V9MfCjxBd+IfBEM16zPPbStbtKzZMm0Agnj0YD8M96AO0ooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigDE8Y6Sdc8Jalp6RRySy27CISdA+PlP4GvlB0eN2jkUo6nDKwwQR1Br7Krk9f8Ahn4W8R3hvLyxaO4YkvJbvsMhIA+b16fzoA+X6+ivgvosml+CftNxAkct9MZQ2MMYwAFB/HcR9feptJ+DvhPTJYppLeW8lQc+e+UY+u2u6VVRQqqFVRgADAAoAdRRRQAUUUlACO6xozuwVVGSxOAB61nf8JJof2jyP7XsvM278eevTOOucV418afF9/L4jbw9bTSwWtmiGVVOPNdl3ZyO21gMfWvK6APspHWRFkRgyMMqynII9RS14H8GfF9/beJI9AuJpZ7O9VhGjHPlOq5BBPQbVIx9K98oAWiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAEpaKKACiiigApKWigD5q+L+my6f8RL52jZYrtY54i0m8sCoDHkkgblYY7Y44xXEV9Y+J/COj+LrJbbVbfeY8mKVTteMkdj/AE6cCuC/4UFo/wBoz/bF75OzphN27PrjGMUAee/CfTZdR+Ien7I2eO23zylZNhVQpAOQQT8xUYHXPpmvpmsPwv4P0fwjZtb6Xb7WkwZZnO55CBjk+nU4HHJrdoAKKKKACikrF8X+JIfCnhy51WZVdowFijJx5jnoP5n8KANqivlnWPiH4q1qWU3Gr3EcUq7WghcpHt9No4q/4f8Air4o0XUFmuNRm1G3Zh5sNy+/coz90nlTz29BQB9MUVV02/g1TTre/tnDw3EYdGHoatUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUlLRQAUUUUAFFFFABXm3xzjmbwRE6SYjW7TemzO7hsHPbHP516TVLV9KtNb0q40y+Qvb3KbHCtg/UH60AfIFFeo6z8CddtpZX0m9tb2BV3IshMcrf7OMEfjkfhV7w98B7wagsviHULf7LGwbybQsxmHOQWIG3t0Bzz060AejfDiOaPwBo4mk3k2ykfJt2jsPw9a6emRxpFGsaDCIAqj0Ap9ABRRRQAUlFeNfET4vahZatPo3hxooRbnbLeECRi2QcJ1XHY5B/DFAHstLXzFb/ABW8a29w039tPJvcO6SRRlWwAMY28DA6DHc9Tmva/hz49TxtpchuIo7fULYgTRo3ysD0ZQTnH1/OgDsqKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooASilooAKKKKACiiigBsm/y28srvwdu7pntmvkHV9/9tX3mbS/2iTdt6Z3HOK+wK8f+IXwgvNV1WbWPD7RM853S2rsE+bIGVPTGOeaAPE69S+Avnf8ACT6h5ZTy/sn7zcDnG4Yx+NYlv8H/ABpPcNE2mpEEcIzvMgXkA5HPzAZ7Z5BHWvZ/h74Ei8E6VJG8y3F7cENPKo+UY6Bc84oA66iiigAooooASisnxN4l07wro8mp6lJtjX5URfvSv2VR6/8A668ovPj7dm4P2LRIhAsuQZZTudOeCAMA9PWgD22lrznwV8X9O8TX8em39t/Z95M2Ivn3Rueyg9dx+lei0ALRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFJS0UAJS0UUAFFFFABSUtJQB4p8f7uc3mkWmJlgCSSHLfu3b5QCBnqBnqP4uO9eP19GfFnwTc+K9FhutOTzL+wLMkef9Yh+8o9+AR9Md68AudG1OzuGt7jT7mOVHMZUxn7w7UAQWc8tteQzwSPHLHIrI8bbWUg8EHsa+woJDLBHI0bxF1DFHxuXI6HBIyPYmvm7wF8OdV8R6xbzXdnJBpkcgaaWQFd4BGVXvk19KUALRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABTHiSTbvRW2HcuRnB9R70+igBKWiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigBK5DVfiRpelX5s3tLuR0uDA5UKAMZyR83PT2oooA39F1m312w+22qSpHvKYlAByPoTWhRRQAtFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQB/9k="
+}

@@ -3,6 +3,11 @@ import numpy as np
 import json
 import os
 import base64
+try:
+    from ultralytics import YOLO
+    HAS_YOLO = True
+except ImportError:
+    HAS_YOLO = False
 
 
 class OmrEngine:
@@ -21,6 +26,21 @@ class OmrEngine:
         self.target_width = target_width
         self.target_height = target_height
         self.option_labels = ['A', 'B', 'C', 'D']
+        self.yolo_model = None
+        
+        if HAS_YOLO:
+            try:
+                # Load pre-trained OMR model if exists, or nano model as fallback
+                model_path = os.path.join(os.path.dirname(__file__), "omr_v8n.pt")
+                if os.path.exists(model_path):
+                    self.yolo_model = YOLO(model_path)
+                else:
+                    # Fallback to general YOLO for marker detection if specific model not found
+                    self.yolo_model = YOLO("yolov8n.pt") 
+                print(f"[+] YOLOv8 loaded successfully")
+            except Exception as e:
+                print(f"[-] YOLOv8 load failed: {e}")
+                self.yolo_model = None
 
     # ──────────────────────────────────────────────────────────────
     #  STEP 1 — Preprocess
@@ -44,54 +64,71 @@ class OmrEngine:
     # ──────────────────────────────────────────────────────────────
     #  STEP 2 — Align sheet via 4 corner markers
     # ──────────────────────────────────────────────────────────────
-    def align_sheet(self, img, edged):
+    def align_sheet(self, img, gray):
         """
-        Finds 4 black square registration marks with:
-        - Corner-proximity check (marker must be in the 30% corner zone)
-        - Quadrant validation (each marker in its expected quadrant)
-        - Circularity + aspect-ratio filter
+        Finds 4 black square registration marks with a multi-threshold retry loop.
         """
         h_img, w_img = img.shape[:2]
-        CORNER_ZONE = 0.30  # marker must be within 30% of each image edge
+        CORNER_ZONE = 0.45  # Relaxed from 0.3 for better file/high-res support
 
-        contours, _ = cv2.findContours(
-            edged.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
-        )
+        # Try different threshold/edge settings to find markers
+        threshold_configs = [
+            {"type": "adaptive", "block": 15, "C": 3},
+            {"type": "adaptive", "block": 11, "C": 2},
+            {"type": "adaptive", "block": 21, "C": 4},
+            {"type": "canny", "low": 60, "high": 200},
+            {"type": "canny", "low": 30, "high": 150}
+        ]
 
         markers = []
-        for c in contours:
-            area = cv2.contourArea(c)
-            if area < 200 or area > 10000:
-                continue
+        for cfg in threshold_configs:
+            markers = []
+            blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+            if cfg["type"] == "canny":
+                processed = cv2.Canny(blurred, cfg["low"], cfg["high"])
+            else:
+                processed = cv2.adaptiveThreshold(
+                    blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
+                    cv2.THRESH_BINARY_INV, cfg["block"], cfg["C"]
+                )
 
-            peri = cv2.arcLength(c, True)
-            approx = cv2.approxPolyDP(c, 0.04 * peri, True)
-            if len(approx) != 4:
-                continue
+            contours, _ = cv2.findContours(
+                processed.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+            )
 
-            x, y, w, h = cv2.boundingRect(approx)
-            aspect = w / float(h)
-            if not (0.65 <= aspect <= 1.45):
-                continue
+            for c in contours:
+                area = cv2.contourArea(c)
+                if area < 80 or area > 25000:
+                    continue
 
-            M = cv2.moments(c)
-            if M["m00"] == 0:
-                continue
-            cx = int(M["m10"] / M["m00"])
-            cy = int(M["m01"] / M["m00"])
+                peri = cv2.arcLength(c, True)
+                approx = cv2.approxPolyDP(c, 0.05 * peri, True)
+                if len(approx) != 4:
+                    continue
 
-            # Corner proximity check
-            in_top    = cy < h_img * CORNER_ZONE
-            in_bottom = cy > h_img * (1 - CORNER_ZONE)
-            in_left   = cx < w_img * CORNER_ZONE
-            in_right  = cx > w_img * (1 - CORNER_ZONE)
-            is_corner = (in_top or in_bottom) and (in_left or in_right)
-            if not is_corner:
-                continue
+                x, y, w, h = cv2.boundingRect(approx)
+                aspect = w / float(h)
+                if not (0.5 <= aspect <= 2.0): # Relaxed aspect ratio
+                    continue
 
-            markers.append((cx, cy))
+                M = cv2.moments(c)
+                if M["m00"] == 0:
+                    continue
+                cx = int(M["m10"] / M["m00"])
+                cy = int(M["m01"] / M["m00"])
 
-        if len(markers) >= 4:
+                # Corner proximity check
+                if (cy < h_img * CORNER_ZONE or cy > h_img * (1 - CORNER_ZONE)) and \
+                   (cx < w_img * CORNER_ZONE or cx > w_img * (1 - CORNER_ZONE)):
+                    markers.append((cx, cy)) # Store as tuple (cx, cy)
+
+            if len(markers) >= 4:
+                break # Found enough markers, exit the config loop
+
+        if len(markers) < 4:
+            print(f"WARNING: Only {len(markers)} markers found after multi-thresholding — using fallback.")
+            screen_cnt = self._full_page_fallback(img)
+        else:
             # Sort and pick best 4
             markers_sorted = sorted(markers, key=lambda p: p[1])
             top2 = sorted(markers_sorted[:2], key=lambda p: p[0])
@@ -111,9 +148,6 @@ class OmrEngine:
             else:
                 print("WARNING: Marker quadrant validation failed — using fallback.")
                 screen_cnt = self._full_page_fallback(img)
-        else:
-            print(f"WARNING: Only {len(markers)} markers — using fallback.")
-            screen_cnt = self._full_page_fallback(img)
 
         # Perspective transform
         dst = np.array([
@@ -138,10 +172,63 @@ class OmrEngine:
             [margin, h - margin]
         ], dtype="float32")
 
+    def align_sheet_ai(self, img):
+        """
+        Uses YOLO to detect corners for much more robust alignment.
+        """
+        if not self.yolo_model or img is None:
+            _, g, _ = self.preprocess(img) if isinstance(img, str) else (img, cv2.cvtColor(img, cv2.COLOR_BGR2GRAY), None)
+            return self.align_sheet(img, g)
+
+        h_img, w_img = img.shape[:2]
+        # Run inference on markers
+        results = self.yolo_model(img, conf=0.25, verbose=False)[0]
+        
+        detected_points = []
+        for box in results.boxes:
+            # We assume classes: 0: marker (or 4 classes for corners)
+            # For simplicity, we filter by confidence and position
+            cls = int(box.cls[0])
+            conf = float(box.conf[0])
+            xyxy = box.xyxy[0].cpu().numpy()
+            cx = int((xyxy[0] + xyxy[2]) / 2)
+            cy = int((xyxy[1] + xyxy[3]) / 2)
+            detected_points.append((cx, cy))
+
+        if len(detected_points) < 4:
+            print(f"[-] YOLO markers failed ({len(detected_points)} detected), fallback to Legacy.")
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            return self.align_sheet(img, gray)
+
+        # Sort points by Y then X to find corners
+        pts = np.array(detected_points, dtype="float32")
+        # Custom sort logic for 4 corners
+        s = pts.sum(axis=1)
+        tl = pts[np.argmin(s)]
+        br = pts[np.argmax(s)]
+        diff = np.diff(pts, axis=1)
+        tr = pts[np.argmin(diff)]
+        bl = pts[np.argmax(diff)]
+        
+        screen_cnt = np.array([tl, tr, br, bl], dtype="float32")
+        
+        # Perspective transform with target dimensions
+        dst = np.array([
+            [0, 0],
+            [self.target_width - 1, 0],
+            [self.target_width - 1, self.target_height - 1],
+            [0, self.target_height - 1]
+        ], dtype="float32")
+
+        M = cv2.getPerspectiveTransform(screen_cnt, dst)
+        warped = cv2.warpPerspective(img, M, (self.target_width, self.target_height))
+        print("[+] YOLO Alignment Success")
+        return warped
+
     # ──────────────────────────────────────────────────────────────
     #  STEP 3 — Extract ROI data
     # ──────────────────────────────────────────────────────────────
-    def extract_roi_data(self, warped, active_q=60):
+    def extract_roi_data(self, warped, active_q=100):
         debug_img = warped.copy()
         gray_warped = cv2.cvtColor(warped, cv2.COLOR_BGR2GRAY)
 
@@ -193,7 +280,10 @@ class OmrEngine:
     #  SET detection (not used — returns None)
     # ──────────────────────────────────────────────────────────────
     def _process_set_section(self, thresh, debug_img):
-        return None
+        """
+        SET detection removed as per user request.
+        """
+        return ""
 
     # ──────────────────────────────────────────────────────────────
     #  Roll detection — improved with adaptive density threshold
@@ -208,11 +298,11 @@ class OmrEngine:
         width  = self.target_width
         height = self.target_height
 
-        roll_start_x   = 0.072
-        roll_start_y   = 0.165
-        roll_col_space = 0.07
-        roll_row_space = 0.0165
-        roi_r          = 8    # Maximized to 8px for better coverage without vertical crosstalk
+        roll_start_x   = 0.070
+        roll_start_y   = 0.135
+        roll_col_space = 0.048
+        roll_row_space = 0.0182
+        roi_r          = 7    # Smaller radius for smaller bubbles (17px diam)
 
         for col in range(6):
             densities = []
@@ -266,20 +356,21 @@ class OmrEngine:
         width  = self.target_width
         height = self.target_height
 
-        num_cols   = 3
-        q_per_col  = 20
-        total_q    = 60
+        num_cols   = 4
+        q_per_col  = 25
+        total_q    = 100
 
-        q_start_y  = 0.365
-        q_row_space = 0.0305
-        gap_height  = 0.0085  # extra gap every 5 questions
-        bubble_r    = 12      # bubble ROI half-size
+        q_start_y   = 0.33
+        q_row_space  = 0.0255
+        gap_height   = 0.007  # extra gap every 5 questions
+        bubble_r     = 12      # bubble ROI half-size
 
-        # ── Per-column background sample (for normalization)
+        # ── 4 columns positions: 5%, 28.5%, 52%, 75.5% (approx from image)
         col_configs = [
-            {"base_x": 0.02},
-            {"base_x": 0.35},
-            {"base_x": 0.68},
+            {"base_x": 0.05},
+            {"base_x": 0.285},
+            {"base_x": 0.52},
+            {"base_x": 0.755},
         ]
 
         for i in range(total_q):
@@ -315,11 +406,11 @@ class OmrEngine:
                     max(0, bx - bubble_r): bx + bubble_r
                 ]
 
-                pixel_count = cv2.countNonZero(roi)
-                roi_area = roi.shape[0] * roi.shape[1] if roi.size > 0 else 1
+                pixel_count = int(cv2.countNonZero(roi))
+                roi_area = int(roi.shape[0] * roi.shape[1]) if roi.size > 0 else 1
 
                 # Density as percentage
-                density_pct = (pixel_count / roi_area) * 100
+                density_pct = float((pixel_count / roi_area) * 100)
 
                 options_data.append({
                     "opt":         self.option_labels[opt_idx],
@@ -341,13 +432,13 @@ class OmrEngine:
             MULTI_SECOND_THRESH  = 8    # second option above this → possible multi-fill
             CONFIDENCE_RATIO     = 1.5  # top must be 1.5x the second for valid
 
-            is_empty = top_pct < EMPTY_THRESHOLD
+            is_empty = float(top_pct) < float(EMPTY_THRESHOLD)
             is_multi_fill = (
-                top_pct >= VALID_THRESHOLD and
-                second_pct >= MULTI_SECOND_THRESH and
-                (top_pct / max(second_pct, 1)) < CONFIDENCE_RATIO
+                float(top_pct) >= float(VALID_THRESHOLD) and
+                float(second_pct) >= float(MULTI_SECOND_THRESH) and
+                (float(top_pct) / max(float(second_pct), 1.0)) < float(CONFIDENCE_RATIO)
             )
-            is_valid = top_pct >= VALID_THRESHOLD and not is_multi_fill
+            is_valid = float(top_pct) >= float(VALID_THRESHOLD) and not is_multi_fill
 
             detected = sorted_opts[0]["opt"] if is_valid else None
 
@@ -370,16 +461,16 @@ class OmrEngine:
                 "errorType":  "MULTIPLE_FILL" if is_multi_fill else ("EMPTY" if is_empty else None)
             })
 
-        print(f"[+] Evaluated {active_q} of 60 questions. {60 - active_q} SKIPPED_INACTIVE.")
+        print(f"[+] Evaluated {active_q} of 100 questions. {100 - active_q} SKIPPED_INACTIVE.")
         return extracted_answers
 
     # ──────────────────────────────────────────────────────────────
     #  MAIN — Full pipeline
     # ──────────────────────────────────────────────────────────────
-    def run(self, image_path, active_q=60, output_json=None, debug_output=None):
-        print(f"[*] Processing: {image_path} | Active Q: {active_q}/60")
-        img, gray, edged = self.preprocess(image_path)
-        warped = self.align_sheet(img, edged)
+    def run(self, image_path, active_q=100, output_json=None, debug_output=None):
+        print(f"[*] Processing: {image_path} | Active Q: {active_q}/100")
+        img, gray, _ = self.preprocess(image_path)
+        warped = self.align_sheet(img, gray)
         data, debug_img = self.extract_roi_data(warped, active_q=active_q)
 
         if output_json:
