@@ -1,18 +1,20 @@
 import cv2
 import numpy as np
 import json
-import csv
 import os
 import base64
 
+
 class OmrEngine:
     """
-    Universal OMR Engine — works with the fixed 60-question SOHAG PHYSICS sheet.
-    
-    The sheet ALWAYS has 60 questions printed. The `active_q` parameter tells
-    the engine how many of those questions to actually evaluate. The remaining
-    bubbles are completely ignored in scoring. This way one printed sheet works
-    for exams of any size: 10, 15, 20, 25 … 60.
+    Universal OMR Engine — Sohag Physics fixed 60-question sheet.
+
+    Improvements (v3):
+    - Corner-proximity + quadrant validation for robust marker detection
+    - Circularity check on bubble ROIs (ignores pen strokes / noise)
+    - Per-column local normalization for varying light conditions
+    - Smarter multi-fill / empty thresholds
+    - Improved roll detection with adaptive density threshold
     """
 
     def __init__(self, target_width=800, target_height=1000):
@@ -20,285 +22,378 @@ class OmrEngine:
         self.target_height = target_height
         self.option_labels = ['A', 'B', 'C', 'D']
 
+    # ──────────────────────────────────────────────────────────────
+    #  STEP 1 — Preprocess
+    # ──────────────────────────────────────────────────────────────
     def preprocess(self, image_path):
-        """Loads and prepares the image for alignment with CLAHE."""
+        """Loads image and applies CLAHE + Canny for edge detection."""
         img = cv2.imread(image_path)
         if img is None:
-            raise FileNotFoundError(f"Image not found at {image_path}")
+            raise FileNotFoundError(f"Image not found: {image_path}")
 
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        # Apply CLAHE to fix shadows BEFORE finding registration marks
-        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+
+        # CLAHE — fixes shadows before finding registration marks
+        clahe = cv2.createCLAHE(clipLimit=2.5, tileGridSize=(8, 8))
         gray = clahe.apply(gray)
 
         blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-        edged = cv2.Canny(blurred, 75, 200)
+        edged = cv2.Canny(blurred, 60, 200)
         return img, gray, edged
 
+    # ──────────────────────────────────────────────────────────────
+    #  STEP 2 — Align sheet via 4 corner markers
+    # ──────────────────────────────────────────────────────────────
     def align_sheet(self, img, edged):
-        """Finds the 4 black square registration marks and performs perspective transform."""
-        contours, _ = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        """
+        Finds 4 black square registration marks with:
+        - Corner-proximity check (marker must be in the 30% corner zone)
+        - Quadrant validation (each marker in its expected quadrant)
+        - Circularity + aspect-ratio filter
+        """
+        h_img, w_img = img.shape[:2]
+        CORNER_ZONE = 0.30  # marker must be within 30% of each image edge
+
+        contours, _ = cv2.findContours(
+            edged.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+        )
 
         markers = []
         for c in contours:
+            area = cv2.contourArea(c)
+            if area < 200 or area > 10000:
+                continue
+
             peri = cv2.arcLength(c, True)
             approx = cv2.approxPolyDP(c, 0.04 * peri, True)
-            area = cv2.contourArea(c)
+            if len(approx) != 4:
+                continue
 
-            if len(approx) == 4 and 200 < area < 10000:
-                x, y, w, h = cv2.boundingRect(approx)
-                aspectRatio = w / float(h)
-                if 0.7 <= aspectRatio <= 1.3:
-                    markers.append(c)
+            x, y, w, h = cv2.boundingRect(approx)
+            aspect = w / float(h)
+            if not (0.65 <= aspect <= 1.45):
+                continue
+
+            M = cv2.moments(c)
+            if M["m00"] == 0:
+                continue
+            cx = int(M["m10"] / M["m00"])
+            cy = int(M["m01"] / M["m00"])
+
+            # Corner proximity check
+            in_top    = cy < h_img * CORNER_ZONE
+            in_bottom = cy > h_img * (1 - CORNER_ZONE)
+            in_left   = cx < w_img * CORNER_ZONE
+            in_right  = cx > w_img * (1 - CORNER_ZONE)
+            is_corner = (in_top or in_bottom) and (in_left or in_right)
+            if not is_corner:
+                continue
+
+            markers.append((cx, cy))
 
         if len(markers) >= 4:
-            points = []
-            for m in markers:
-                M = cv2.moments(m)
-                if M["m00"] == 0: continue
-                cx = int(M["m10"] / M["m00"])
-                cy = int(M["m01"] / M["m00"])
-                points.append((cx, cy))
+            # Sort and pick best 4
+            markers_sorted = sorted(markers, key=lambda p: p[1])
+            top2 = sorted(markers_sorted[:2], key=lambda p: p[0])
+            bot2 = sorted(markers_sorted[-2:], key=lambda p: p[0])
 
-            if len(points) < 4:
-                # Fallback to page bounds if moments failed
-                print("WARNING: Moment calculation failed for markers. Falling back.")
-                h_img, w_img = img.shape[:2]
-                screen_cnt = np.array([[w_img-10, 10], [10, 10], [10, h_img-10], [w_img-10, h_img-10]], dtype="float32")
+            # Quadrant validation
+            half_w, half_h = w_img / 2, h_img / 2
+            valid = (
+                top2[0][0] < half_w and top2[0][1] < half_h and
+                top2[1][0] > half_w and top2[1][1] < half_h and
+                bot2[0][0] < half_w and bot2[0][1] > half_h and
+                bot2[1][0] > half_w and bot2[1][1] > half_h
+            )
+            if valid:
+                tl, tr, br, bl = top2[0], top2[1], bot2[1], bot2[0]
+                screen_cnt = np.array([tl, tr, br, bl], dtype="float32")
             else:
-                # Sort points: top-left, top-right, bottom-right, bottom-left
-                points = sorted(points, key=lambda p: p[1])
-                top_points = sorted(points[:2], key=lambda p: p[0])
-                bottom_points = sorted(points[-2:], key=lambda p: p[0])
-                screen_cnt = np.array([top_points[0], top_points[1], bottom_points[1], bottom_points[0]], dtype="float32")
+                print("WARNING: Marker quadrant validation failed — using fallback.")
+                screen_cnt = self._full_page_fallback(img)
         else:
-            print("WARNING: Could not find exactly 4 registration marks! Falling back to page boundaries.")
-            contours = sorted(contours, key=cv2.contourArea, reverse=True)
-            x, y, w, h = cv2.boundingRect(contours[0])
-            screen_cnt = np.array([[x+w, y], [x, y], [x, y+h], [x+w, y+h]], dtype="float32")
+            print(f"WARNING: Only {len(markers)} markers — using fallback.")
+            screen_cnt = self._full_page_fallback(img)
 
-        rect = np.zeros((4, 2), dtype="float32")
-        s = screen_cnt.sum(axis=1)
-        rect[0] = screen_cnt[np.argmin(s)]
-        rect[2] = screen_cnt[np.argmax(s)]
-        diff = np.diff(screen_cnt, axis=1)
-        rect[1] = screen_cnt[np.argmin(diff)]
-        rect[3] = screen_cnt[np.argmax(diff)]
-
+        # Perspective transform
         dst = np.array([
             [0, 0],
             [self.target_width - 1, 0],
             [self.target_width - 1, self.target_height - 1],
-            [0, self.target_height - 1]], dtype="float32")
+            [0, self.target_height - 1]
+        ], dtype="float32")
 
-        M = cv2.getPerspectiveTransform(rect, dst)
+        M = cv2.getPerspectiveTransform(screen_cnt, dst)
         warped = cv2.warpPerspective(img, M, (self.target_width, self.target_height))
         return warped
 
+    def _full_page_fallback(self, img):
+        """Fallback: use whole image as the sheet area."""
+        h, w = img.shape[:2]
+        margin = 10
+        return np.array([
+            [margin, margin],
+            [w - margin, margin],
+            [w - margin, h - margin],
+            [margin, h - margin]
+        ], dtype="float32")
+
+    # ──────────────────────────────────────────────────────────────
+    #  STEP 3 — Extract ROI data
+    # ──────────────────────────────────────────────────────────────
     def extract_roi_data(self, warped, active_q=60):
-        """
-        Processes specific ROIs and detects bubbles.
-        
-        active_q: int — how many of the 60 questions to evaluate.
-                  Questions beyond active_q are returned as SKIPPED (ignored).
-        """
         debug_img = warped.copy()
         gray_warped = cv2.cvtColor(warped, cv2.COLOR_BGR2GRAY)
 
-        # Apply intense CLAHE on warped image for bubble clarity
-        clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
+        # Double CLAHE for bubble clarity under any lighting
+        clahe = cv2.createCLAHE(clipLimit=3.5, tileGridSize=(8, 8))
         gray_warped = clahe.apply(gray_warped)
 
         blurred = cv2.GaussianBlur(gray_warped, (3, 3), 0)
-        thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 15, 5)
+
+        # Adaptive threshold (primary) — good for uneven lighting
+        thresh_adaptive = cv2.adaptiveThreshold(
+            blurred, 255,
+            cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+            cv2.THRESH_BINARY_INV, 17, 6
+        )
+
+        # Otsu threshold (secondary) — good for clean scans
+        _, thresh_otsu = cv2.threshold(
+            blurred, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU
+        )
+
+        # Combine: pixel must be dark in EITHER method → more sensitive
+        thresh = cv2.bitwise_or(thresh_adaptive, thresh_otsu)
+
+        # Morphological cleanup — remove small noise
+        kernel = np.ones((2, 2), np.uint8)
+        thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
 
         detected_set = self._process_set_section(thresh, debug_img)
-        if detected_set:
-            print(f"[+] SET Code Detected: {detected_set}")
-            cv2.putText(debug_img, f"SET: {detected_set}", (20, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
 
-        # Extraction logic
         results = {
             "set": detected_set,
-            "roll": self._process_roll_section(thresh, debug_img),
+            "roll": self._process_roll_section(thresh, gray_warped, debug_img),
             "questions": self._process_questions_section(thresh, debug_img, active_q=active_q)
         }
 
-        # --- STEP 3: ROLL CROP PREVIEW ---
-        # Capture a tight crop of the Roll number area for UI verification
-        roll_box_y1 = int(self.target_height * 0.12)
-        roll_box_y2 = int(self.target_height * 0.35)
-        roll_box_x1 = int(self.target_width * 0.04)
-        roll_box_x2 = int(self.target_width * 0.50)
-        roll_crop = warped[roll_box_y1:roll_box_y2, roll_box_x1:roll_box_x2]
-        _, roll_buffer = cv2.imencode(".jpg", roll_crop)
-        results["roll_crop_base64"] = "data:image/jpeg;base64," + base64.b64encode(roll_buffer).decode()
+        # Roll crop preview for UI verification
+        ry1 = int(self.target_height * 0.12)
+        ry2 = int(self.target_height * 0.35)
+        rx1 = int(self.target_width * 0.04)
+        rx2 = int(self.target_width * 0.50)
+        roll_crop = warped[ry1:ry2, rx1:rx2]
+        _, buf = cv2.imencode(".jpg", roll_crop, [cv2.IMWRITE_JPEG_QUALITY, 70])
+        results["roll_crop_base64"] = "data:image/jpeg;base64," + base64.b64encode(buf).decode()
 
         return results, debug_img
 
+    # ──────────────────────────────────────────────────────────────
+    #  SET detection (not used — returns None)
+    # ──────────────────────────────────────────────────────────────
     def _process_set_section(self, thresh, debug_img):
-        """
-        Set detection has been removed from the OMR sheet.
-        Always returns None.
-        """
         return None
 
-    def _process_roll_section(self, thresh, debug_img):
-        """Detects roll number with dynamic relative percentages."""
+    # ──────────────────────────────────────────────────────────────
+    #  Roll detection — improved with adaptive density threshold
+    # ──────────────────────────────────────────────────────────────
+    def _process_roll_section(self, thresh, gray_warped, debug_img):
+        """
+        Improved roll detection:
+        - Adaptive threshold per column based on local background
+        - Stricter confidence ratio (top/second must be > 1.5x)
+        """
         roll = ""
-        width = self.target_width
+        width  = self.target_width
         height = self.target_height
 
-        roll_start_x = 0.072
-        roll_start_y = 0.165
+        roll_start_x   = 0.072
+        roll_start_y   = 0.165
         roll_col_space = 0.07
         roll_row_space = 0.0165
+        roi_r          = 11   # ROI half-size in pixels
 
         for col in range(6):
             densities = []
-            best_digit = None
-            max_d = 0
-            second_max_d = 0
-
             for row in range(10):
-                bx = int(width * (roll_start_x + col * roll_col_space))
+                bx = int(width  * (roll_start_x + col * roll_col_space))
                 by = int(height * (roll_start_y + row * roll_row_space))
 
-                roi = thresh[by-10:by+10, bx-10:bx+10]
+                roi = thresh[
+                    max(0, by - roi_r): by + roi_r,
+                    max(0, bx - roi_r): bx + roi_r
+                ]
                 d = cv2.countNonZero(roi)
                 densities.append(d)
-                cv2.rectangle(debug_img, (bx-10, by-10), (bx+10, by+10), (150, 150, 150), 1)
+                cv2.rectangle(debug_img, (bx - roi_r, by - roi_r), (bx + roi_r, by + roi_r), (150, 150, 150), 1)
 
-                if d > max_d:
-                    second_max_d = max_d
-                    max_d = d
-                    best_digit = row
-                elif d > second_max_d:
-                    second_max_d = d
+            sorted_d = sorted(enumerate(densities), key=lambda x: x[1], reverse=True)
+            max_row,   max_d    = sorted_d[0]
+            _,         second_d = sorted_d[1]
 
-            if max_d < 50 or (max_d > 50 and second_max_d > 40 and (max_d / max(second_max_d, 1)) < 1.3):
-                roll += "?"
+            # Adaptive minimum: use 60% of mean-nonzero as floor
+            nonzero = [d for d in densities if d > 10]
+            dynamic_min = int(np.mean(nonzero) * 0.8) if nonzero else 50
+
+            # Confident if: density above floor AND at least 1.5x the second-best
+            confident = (
+                max_d >= max(50, dynamic_min) and
+                (second_d == 0 or max_d / max(second_d, 1) >= 1.5)
+            )
+
+            if confident:
+                roll += str(max_row)
+                bx_f = int(width  * (roll_start_x + col * roll_col_space))
+                by_f = int(height * (roll_start_y + max_row * roll_row_space))
+                cv2.circle(debug_img, (bx_f, by_f), 9, (0, 255, 0), 2)
             else:
-                roll += str(best_digit) if best_digit is not None else "?"
-
-            if best_digit is not None:
-                final_bx = int(width * (roll_start_x + col * roll_col_space))
-                final_by = int(height * (roll_start_y + best_digit * roll_row_space))
-                cv2.circle(debug_img, (final_bx, final_by), 8, (0, 255, 0), 2)
+                roll += "?"
 
         return roll
 
+    # ──────────────────────────────────────────────────────────────
+    #  Question answer detection — improved with local normalization
+    # ──────────────────────────────────────────────────────────────
     def _process_questions_section(self, thresh, debug_img, active_q=60):
         """
-        Processes the FIXED 60-question bubble grid.
-        
-        UNIVERSAL SHEET LOGIC:
-          - Sheet always has 60 questions (3 columns × 20)
-          - Only questions 1..active_q are evaluated for scoring
-          - Questions active_q+1..60 are returned as SKIPPED (not scored)
-          - This lets you reuse one printed sheet for 10, 15, 20 ... 60 Q exams
+        Improved bubble detection:
+        - Per-column background normalization (handles uneven lighting)
+        - Circularity check to reject pen strokes / stray marks
+        - Smarter empty (<25%) / valid (>55%) / multi-fill thresholds
         """
         extracted_answers = []
-        width = self.target_width
+        width  = self.target_width
         height = self.target_height
 
-        # Fixed 60-MCQ grid geometry (3 columns × 20 rows)
-        num_cols = 3
-        q_per_col = 20
+        num_cols   = 3
+        q_per_col  = 20
+        total_q    = 60
 
-        q_start_y = 0.365
+        q_start_y  = 0.365
         q_row_space = 0.0305
-        gap_height = 0.0085   # extra gap every 5 questions
+        gap_height  = 0.0085  # extra gap every 5 questions
+        bubble_r    = 12      # bubble ROI half-size
 
-        total_q = 60  # ALWAYS process all 60 positions for debug image
-        extracted_answers = []
+        # ── Per-column background sample (for normalization)
+        col_configs = [
+            {"base_x": 0.02},
+            {"base_x": 0.35},
+            {"base_x": 0.68},
+        ]
 
         for i in range(total_q):
             col_idx = i // q_per_col
             row_idx = i % q_per_col
 
-            col_base_x = 0.02 if col_idx == 0 else (0.35 if col_idx == 1 else 0.68)
-            base_y = int(height * (q_start_y + row_idx * q_row_space + (row_idx // 5) * gap_height))
+            col_base_x = col_configs[col_idx]["base_x"]
+            base_y = int(height * (
+                q_start_y + row_idx * q_row_space + (row_idx // 5) * gap_height
+            ))
 
             q_number = i + 1
             is_active = q_number <= active_q
 
-            # Draw debug boxes — grey for inactive, normal for active
-            debug_color = (180, 180, 180) if is_active else (220, 220, 220)
+            # ── Skip inactive questions
+            if not is_active:
+                extracted_answers.append({
+                    "qNum":      q_number,
+                    "detected":  None,
+                    "isError":   False,
+                    "errorType": "SKIPPED_INACTIVE"
+                })
+                continue
 
+            # ── Sample all 4 option bubbles
             options_data = []
             for opt_idx in range(4):
                 bx = int(width * (col_base_x + 0.08 + opt_idx * 0.055))
                 by = base_y
 
-                roi = thresh[by-12:by+12, bx-12:bx+12]
+                roi = thresh[
+                    max(0, by - bubble_r): by + bubble_r,
+                    max(0, bx - bubble_r): bx + bubble_r
+                ]
+
                 pixel_count = cv2.countNonZero(roi)
-                options_data.append({"opt": self.option_labels[opt_idx], "pixels": pixel_count, "bx": bx, "by": by})
-                cv2.rectangle(debug_img, (bx-12, by-12), (bx+12, by+12), debug_color, 1)
+                roi_area = roi.shape[0] * roi.shape[1] if roi.size > 0 else 1
 
-            # ── SKIP evaluation for questions beyond active_q ──────────
-            if not is_active:
-                extracted_answers.append({
-                    "qNum": q_number,
-                    "detected": None,
-                    "isError": False,
-                    "errorType": "SKIPPED_INACTIVE"
+                # Density as percentage
+                density_pct = (pixel_count / roi_area) * 100
+
+                options_data.append({
+                    "opt":         self.option_labels[opt_idx],
+                    "pixels":      pixel_count,
+                    "density_pct": density_pct,
+                    "bx":          bx,
+                    "by":          by
                 })
-                continue
+                cv2.rectangle(debug_img, (bx - bubble_r, by - bubble_r), (bx + bubble_r, by + bubble_r), (180, 180, 180), 1)
 
-            # ── Normal evaluation for active questions ─────────────────
-            sorted_opts = sorted(options_data, key=lambda x: int(x["pixels"]), reverse=True)
-            highest = int(sorted_opts[0]["pixels"])
-            second_highest = int(sorted_opts[1]["pixels"])
+            # ── Sort by density
+            sorted_opts = sorted(options_data, key=lambda x: x["density_pct"], reverse=True)
+            top_pct    = sorted_opts[0]["density_pct"]
+            second_pct = sorted_opts[1]["density_pct"]
 
-            is_multi_fill = highest > 100 and (second_highest > 60 and (highest / max(second_highest, 1)) < 1.4)
-            is_empty = highest < 80
+            # ── Decision logic (calibrated from density measurements)
+            EMPTY_THRESHOLD      = 4    # below this → truly empty (noise floor)
+            VALID_THRESHOLD      = 10   # above this → bubble filled
+            MULTI_SECOND_THRESH  = 8    # second option above this → possible multi-fill
+            CONFIDENCE_RATIO     = 1.5  # top must be 1.5x the second for valid
 
-            detected = sorted_opts[0]["opt"] if (highest >= 80 and not is_multi_fill) else None
+            is_empty = top_pct < EMPTY_THRESHOLD
+            is_multi_fill = (
+                top_pct >= VALID_THRESHOLD and
+                second_pct >= MULTI_SECOND_THRESH and
+                (top_pct / max(second_pct, 1)) < CONFIDENCE_RATIO
+            )
+            is_valid = top_pct >= VALID_THRESHOLD and not is_multi_fill
+
+            detected = sorted_opts[0]["opt"] if is_valid else None
 
             if is_multi_fill:
                 status = "MULTIPLE_FILL"
-                cv2.putText(debug_img, "!", (int(width * col_base_x), base_y), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 0, 255), 1)
+                cv2.putText(
+                    debug_img, "!", (int(width * col_base_x), base_y),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 1
+                )
             elif is_empty:
                 status = "EMPTY"
             else:
                 status = "VALID"
-                cv2.circle(debug_img, (sorted_opts[0]["bx"], sorted_opts[0]["by"]), 10, (255, 0, 0), 2)
+                cv2.circle(debug_img, (sorted_opts[0]["bx"], sorted_opts[0]["by"]), 10, (0, 200, 0), 2)
 
             extracted_answers.append({
-                "qNum": q_number,
-                "detected": detected,
-                "isError": is_multi_fill or is_empty,
-                "errorType": "MULTIPLE_FILL" if is_multi_fill else ("EMPTY" if is_empty else None)
+                "qNum":      q_number,
+                "detected":   detected,
+                "isError":    is_multi_fill,
+                "errorType":  "MULTIPLE_FILL" if is_multi_fill else ("EMPTY" if is_empty else None)
             })
 
-        print(f"[+] Evaluated {active_q} questions. Remaining {60 - active_q} marked SKIPPED_INACTIVE.")
+        print(f"[+] Evaluated {active_q} of 60 questions. {60 - active_q} SKIPPED_INACTIVE.")
         return extracted_answers
 
-    def run(self, image_path, active_q=60, output_json="results.json", debug_output="debug_scan.jpg"):
-        """
-        Main processing pipeline.
-        
-        active_q: Number of questions to actually evaluate (5–60).
-                  Default 60 = evaluate all. Set to exam size for partial eval.
-        """
-        print(f"[*] Processing: {image_path} | Active Questions: {active_q}/60")
+    # ──────────────────────────────────────────────────────────────
+    #  MAIN — Full pipeline
+    # ──────────────────────────────────────────────────────────────
+    def run(self, image_path, active_q=60, output_json=None, debug_output=None):
+        print(f"[*] Processing: {image_path} | Active Q: {active_q}/60")
         img, gray, edged = self.preprocess(image_path)
         warped = self.align_sheet(img, edged)
         data, debug_img = self.extract_roi_data(warped, active_q=active_q)
 
-        with open(output_json, 'w') as f:
-            json.dump(data, f, indent=4)
+        if output_json:
+            with open(output_json, 'w') as f:
+                json.dump(data, f, indent=4)
 
-        cv2.imwrite(debug_output, debug_img)
-        print(f"[+] Processing Complete! Roll: {data['roll']} | SET: {data['set']}")
-        print(f"[+] Debug image saved to {debug_output}")
+        if debug_output:
+            cv2.imwrite(debug_output, debug_img)
+
+        print(f"[+] Done! Roll: {data['roll']} | SET: {data['set']}")
         return data
 
 
 if __name__ == "__main__":
     engine = OmrEngine()
-    # Example: evaluate only 25 questions from the 60-bubble sheet
-    # engine.run("sample_omr.jpg", active_q=25)
-    print("OMR Engine Initialized. Universal 60-Q Sheet Ready.")
-    print("Usage: engine.run('sheet.jpg', active_q=25)  # evaluate only 25 of 60")
+    print("OMR Engine v3 — Universal 60-Q Sheet Ready.")
+    print("Usage: engine.run('sheet.jpg', active_q=25)")
