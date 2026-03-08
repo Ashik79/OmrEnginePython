@@ -212,7 +212,7 @@ class OmrEngine:
         roll_start_y   = 0.165
         roll_col_space = 0.07
         roll_row_space = 0.0165
-        roi_r          = 11   # ROI half-size in pixels
+        roi_r          = 8    # Maximized to 8px for better coverage without vertical crosstalk
 
         for col in range(6):
             densities = []
@@ -232,21 +232,21 @@ class OmrEngine:
             max_row,   max_d    = sorted_d[0]
             _,         second_d = sorted_d[1]
 
-            # Adaptive minimum: use 60% of mean-nonzero as floor
-            nonzero = [d for d in densities if d > 10]
-            dynamic_min = int(np.mean(nonzero) * 0.8) if nonzero else 50
+            # Adaptive minimum: use mean of nonzero as a baseline
+            nonzero = [d for d in densities if d > 5]
+            dynamic_min = int(np.mean(nonzero) * 0.5) if nonzero else 25
 
-            # Confident if: density above floor AND at least 1.5x the second-best
+            # Confident if: density above floor AND significantly higher than noise
             confident = (
-                max_d >= max(50, dynamic_min) and
-                (second_d == 0 or max_d / max(second_d, 1) >= 1.5)
+                max_d >= max(25, dynamic_min) and
+                (second_d == 0 or max_d / max(second_d, 1) >= 1.25)
             )
 
             if confident:
                 roll += str(max_row)
                 bx_f = int(width  * (roll_start_x + col * roll_col_space))
                 by_f = int(height * (roll_start_y + max_row * roll_row_space))
-                cv2.circle(debug_img, (bx_f, by_f), 9, (0, 255, 0), 2)
+                cv2.circle(debug_img, (bx_f, by_f), 7, (0, 255, 0), 2)
             else:
                 roll += "?"
 
