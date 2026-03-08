@@ -398,7 +398,7 @@ class OmrEngine:
             # ── Sample all 4 option bubbles
             options_data = []
             for opt_idx in range(4):
-                bx = int(width * (col_base_x + 0.08 + opt_idx * 0.055))
+                bx = int(width * (col_base_x + 0.08 + opt_idx * 0.038))
                 by = base_y
 
                 roi = thresh[

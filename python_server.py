@@ -18,10 +18,10 @@ def scan_omr():
     Body JSON:
       {
         "image": "<base64 image data>",
-        "active_q": 25        ← optional, default 75 (how many Q to evaluate)
+        "active_q": 25        ← optional, default 100 (how many Q to evaluate)
       }
     
-    UNIVERSAL SHEET: The printed OMR sheet always has 75 bubbles.
+    UNIVERSAL SHEET: The printed OMR sheet always has 100 bubbles.
     active_q tells the engine how many to evaluate, rest are SKIPPED_INACTIVE.
     """
     print(f"[*] Received scan request. AI Mode: {request.json.get('use_ai', False)}")
@@ -35,9 +35,9 @@ def scan_omr():
         if "base64," in image_data:
             image_data = image_data.split("base64,")[1]
 
-        # Get active_q — default to 60
-        active_q = int(data.get('active_q', 60))
-        active_q = max(5, min(60, active_q))
+        # Get active_q — default to 100
+        active_q = int(data.get('active_q', 100))
+        active_q = max(5, min(100, active_q))
         
         # Get AI flag
         use_ai = data.get('use_ai', False)
