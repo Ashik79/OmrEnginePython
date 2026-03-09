@@ -1,52 +1,52 @@
 {
-    "set": null,
-    "roll": "?123??",
+    "set": "",
+    "roll": "?3?45?",
     "questions": [
         {
             "qNum": 1,
-            "detected": "A",
+            "detected": null,
             "isError": false,
-            "errorType": null
+            "errorType": "EMPTY"
         },
         {
             "qNum": 2,
-            "detected": "B",
+            "detected": null,
             "isError": false,
-            "errorType": null
+            "errorType": "EMPTY"
         },
         {
             "qNum": 3,
-            "detected": "C",
+            "detected": "A",
             "isError": false,
             "errorType": null
         },
         {
             "qNum": 4,
-            "detected": "D",
-            "isError": false,
-            "errorType": null
-        },
-        {
-            "qNum": 5,
             "detected": "A",
             "isError": false,
             "errorType": null
         },
         {
-            "qNum": 6,
-            "detected": "B",
-            "isError": false,
-            "errorType": null
-        },
-        {
-            "qNum": 7,
+            "qNum": 5,
             "detected": "C",
             "isError": false,
             "errorType": null
         },
         {
-            "qNum": 8,
+            "qNum": 6,
             "detected": "D",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 7,
+            "detected": null,
+            "isError": false,
+            "errorType": "EMPTY"
+        },
+        {
+            "qNum": 8,
+            "detected": "A",
             "isError": false,
             "errorType": null
         },
@@ -58,25 +58,25 @@
         },
         {
             "qNum": 10,
-            "detected": "B",
-            "isError": false,
-            "errorType": null
-        },
-        {
-            "qNum": 11,
             "detected": "C",
             "isError": false,
             "errorType": null
         },
         {
-            "qNum": 12,
+            "qNum": 11,
             "detected": "D",
             "isError": false,
             "errorType": null
         },
         {
-            "qNum": 13,
+            "qNum": 12,
             "detected": null,
+            "isError": false,
+            "errorType": "EMPTY"
+        },
+        {
+            "qNum": 13,
+            "detected": "A",
             "isError": false,
             "errorType": null
         },
@@ -88,33 +88,33 @@
         },
         {
             "qNum": 15,
-            "detected": null,
+            "detected": "C",
             "isError": false,
             "errorType": null
         },
         {
             "qNum": 16,
-            "detected": null,
-            "isError": false,
-            "errorType": null
-        },
-        {
-            "qNum": 17,
             "detected": "D",
             "isError": false,
             "errorType": null
         },
         {
-            "qNum": 18,
+            "qNum": 17,
             "detected": null,
+            "isError": false,
+            "errorType": "EMPTY"
+        },
+        {
+            "qNum": 18,
+            "detected": "A",
             "isError": false,
             "errorType": null
         },
         {
             "qNum": 19,
-            "detected": "B",
-            "isError": false,
-            "errorType": null
+            "detected": null,
+            "isError": true,
+            "errorType": "MULTIPLE_FILL"
         },
         {
             "qNum": 20,
@@ -358,6 +358,246 @@
         },
         {
             "qNum": 60,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 61,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 62,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 63,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 64,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 65,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 66,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 67,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 68,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 69,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 70,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 71,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 72,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 73,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 74,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 75,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 76,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 77,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 78,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 79,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 80,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 81,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 82,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 83,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 84,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 85,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 86,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 87,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 88,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 89,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 90,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 91,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 92,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 93,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 94,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 95,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 96,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 97,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 98,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 99,
+            "detected": null,
+            "isError": false,
+            "errorType": "SKIPPED_INACTIVE"
+        },
+        {
+            "qNum": 100,
             "detected": null,
             "isError": false,
             "errorType": "SKIPPED_INACTIVE"

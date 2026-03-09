@@ -56,7 +56,6 @@ def scan_omr():
         # Run OMR Engine (AI or Legacy)
         if use_ai:
             print("[*] Using AI Engine (YOLOv8)")
-            # In AI mode, we use the new align_sheet_ai + extract_roi_data
             img_prep, _, _ = engine.preprocess(temp_filename)
             warped = engine.align_sheet_ai(img_prep)
             if warped is None:
@@ -66,6 +65,11 @@ def scan_omr():
             result = engine.run(temp_filename, active_q=active_q)
             if not result.get('success', False) and 'error' in result:
                 return jsonify({"success": False, "error": result['error']}), 200
+
+        # Log summary for visibility
+        print(f"[+] Scan Complete: Roll={result.get('roll', '?')} | SET={result.get('set', '?')}")
+        correct_count = sum(1 for q in result.get('questions', []) if q.get('detected') is not None)
+        print(f"[+] Detected {correct_count} filled bubbles")
 
         return jsonify({
             "success": True,
@@ -80,7 +84,7 @@ def scan_omr():
 
 @app.route('/health', methods=['GET'])
 def health_check():
-    return jsonify({"status": "ok", "engine": "Universal 75-Q OMR", "version": "2.0"})
+    return jsonify({"status": "ok", "engine": "Universal 100-Q OMR", "version": "2.0"})
 
 if __name__ == '__main__':
     print("=" * 50)

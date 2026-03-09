@@ -1,0 +1,607 @@
+{
+    "set": "",
+    "roll": "123456",
+    "questions": [
+        {
+            "qNum": 1,
+            "detected": "A",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 2,
+            "detected": "B",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 3,
+            "detected": "C",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 4,
+            "detected": "D",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 5,
+            "detected": "A",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 6,
+            "detected": "B",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 7,
+            "detected": "C",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 8,
+            "detected": "D",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 9,
+            "detected": "A",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 10,
+            "detected": "B",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 11,
+            "detected": "C",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 12,
+            "detected": "D",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 13,
+            "detected": "A",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 14,
+            "detected": "B",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 15,
+            "detected": "C",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 16,
+            "detected": "D",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 17,
+            "detected": "A",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 18,
+            "detected": "B",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 19,
+            "detected": "C",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 20,
+            "detected": "D",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 21,
+            "detected": "A",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 22,
+            "detected": "B",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 23,
+            "detected": "C",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 24,
+            "detected": "D",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 25,
+            "detected": "A",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 26,
+            "detected": "B",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 27,
+            "detected": "C",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 28,
+            "detected": "D",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 29,
+            "detected": "A",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 30,
+            "detected": "B",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 31,
+            "detected": "C",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 32,
+            "detected": "D",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 33,
+            "detected": "A",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 34,
+            "detected": "B",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 35,
+            "detected": "C",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 36,
+            "detected": "D",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 37,
+            "detected": "A",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 38,
+            "detected": "B",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 39,
+            "detected": "C",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 40,
+            "detected": "D",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 41,
+            "detected": "A",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 42,
+            "detected": "B",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 43,
+            "detected": "C",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 44,
+            "detected": "D",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 45,
+            "detected": "A",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 46,
+            "detected": "B",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 47,
+            "detected": "C",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 48,
+            "detected": "D",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 49,
+            "detected": "A",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 50,
+            "detected": "B",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 51,
+            "detected": "C",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 52,
+            "detected": "D",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 53,
+            "detected": "A",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 54,
+            "detected": "B",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 55,
+            "detected": "C",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 56,
+            "detected": "D",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 57,
+            "detected": "A",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 58,
+            "detected": "B",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 59,
+            "detected": "C",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 60,
+            "detected": "D",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 61,
+            "detected": "A",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 62,
+            "detected": "B",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 63,
+            "detected": "C",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 64,
+            "detected": "D",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 65,
+            "detected": "A",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 66,
+            "detected": "B",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 67,
+            "detected": "C",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 68,
+            "detected": "D",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 69,
+            "detected": "A",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 70,
+            "detected": "B",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 71,
+            "detected": "C",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 72,
+            "detected": "D",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 73,
+            "detected": "A",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 74,
+            "detected": "B",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 75,
+            "detected": "C",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 76,
+            "detected": "D",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 77,
+            "detected": "A",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 78,
+            "detected": "B",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 79,
+            "detected": "C",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 80,
+            "detected": "D",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 81,
+            "detected": "A",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 82,
+            "detected": "B",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 83,
+            "detected": "C",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 84,
+            "detected": "D",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 85,
+            "detected": "A",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 86,
+            "detected": "B",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 87,
+            "detected": "C",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 88,
+            "detected": "D",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 89,
+            "detected": "A",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 90,
+            "detected": "B",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 91,
+            "detected": "C",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 92,
+            "detected": "D",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 93,
+            "detected": "A",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 94,
+            "detected": "B",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 95,
+            "detected": "C",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 96,
+            "detected": "D",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 97,
+            "detected": "A",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 98,
+            "detected": "B",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 99,
+            "detected": "C",
+            "isError": false,
+            "errorType": null
+        },
+        {
+            "qNum": 100,
+            "detected": "D",
+            "isError": false,
+            "errorType": null
+        }
+    ],
+    "roll_crop_base64": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAoHBwgHBgoICAgLCgoLDhgQDg0NDh0VFhEYIx8lJCIfIiEmKzcvJik0KSEiMEExNDk7Pj4+JS5ESUM8SDc9Pjv/2wBDAQoLCw4NDhwQEBw7KCIoOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozv/wAARCADmAXADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD2aiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA5jxf4/wBD8F+QmpPNLcT8rb2yq0gXn5yCQAuRjryemcHFLwb8UND8Y3QsIUmsr/yg/kT7cSHGWEbA/Nt9wCRzjg48a+LdvdQ/EjU2uh/rvLeJxGUV08tQMZJzjG0kHBKngdBjeDre6ufGejR2QzcfbomQ+WZAu1wSxUEEqACTyOAeR1oA+sqKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAMjxB4W0TxTBDDrVgl2sDFoyWZGUkYOGUg4PGRnBwPQVV8M+B/D/hLc+k2Oy4kiWOW4kcvJIB7ngZPJCgAnHHAx0NFABRRRQAVl6r4l0PRJFi1TVrO0lfbtjlmVXIZtoO3rtz1PQYJJABrQmkaKCSRIXmZFLCNCAzkdhuIGT05IHvXyDqWpXmr6jPqGoXD3F1cNukkfqT/ACAAwABwAABxQB9d2d7a6hapdWVzDdW8mdksMgdGwcHBHB5BFT14L8CNVv4/Et3pKvNJYzWzTPECuyN1KgSHJyODt+XJOVyMDI96oAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAK8p8TfA2z1PVZL7RdQTTY5mUvaGDciEt85QgjAxkhcYzxkAjb6tRQByXgX4e6b4HtZDFJ9sv58iW8ePaSueEUZO1ehPJyeT0AHW0UUAFFFc9448Tf8Il4Uu9WRYZLhNqW8Ur7RI7HA9zgZYgckKeR1AB0NFfJlx4x8TXN8b2TxBqP2g78Oly6bQxBYKAQFUlV4GBwPQV7/APC/xjP4x8NNLfmH7fZy+TNsYAyDAKyFf4d3I9CVbGOgAO0ooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigArI8U+H4vFPhu80Wad4FuVAEqAEoysGU47jKjI4yM8jrWvRQB8zT/CTxtBfG1XR/O++Vljnj8twpAzksMZyCA2CRnjg49y8AeEP+EL8NLpr3P2i4llM9w6/cDkAEL32gKOTyeTxnA6eigAooooAKKwvGHiuz8G6DJqt4jyksIoIU4MshBIXP8ACMAkk9gepwD45b/HfxMl8Jriy06W3OwPAkbpwCdxVtxIYg4ycgYHHXIB9AUVnaFr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"
+}

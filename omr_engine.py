@@ -299,7 +299,7 @@ class OmrEngine:
         height = self.target_height
 
         roll_start_x   = 0.070
-        roll_start_y   = 0.135
+        roll_start_y   = 0.145
         roll_col_space = 0.048
         roll_row_space = 0.0182
         roi_r          = 7    # Smaller radius for smaller bubbles (17px diam)
@@ -360,9 +360,9 @@ class OmrEngine:
         q_per_col  = 25
         total_q    = 100
 
-        q_start_y   = 0.33
-        q_row_space  = 0.0255
-        gap_height   = 0.007  # extra gap every 5 questions
+        q_start_y   = 0.345
+        q_row_space  = 0.024
+        gap_height   = 0.006  # extra gap every 5 questions
         bubble_r     = 12      # bubble ROI half-size
 
         # ── 4 columns positions: 5%, 28.5%, 52%, 75.5% (approx from image)
@@ -406,8 +406,16 @@ class OmrEngine:
                     max(0, bx - bubble_r): bx + bubble_r
                 ]
 
-                pixel_count = int(cv2.countNonZero(roi))
-                roi_area = int(roi.shape[0] * roi.shape[1]) if roi.size > 0 else 1
+                # ── Circular Masking: ignore noise outside the bubble radius
+                if roi.size > 0:
+                    rr, cc = np.ogrid[:roi.shape[0], :roi.shape[1]]
+                    center_y, center_x = roi.shape[0] // 2, roi.shape[1] // 2
+                    mask = (rr - center_y)**2 + (cc - center_x)**2 <= (bubble_r-1)**2
+                    pixel_count = int(cv2.countNonZero(roi[mask]))
+                    roi_area = int(np.sum(mask))
+                else:
+                    pixel_count = 0
+                    roi_area = 1
 
                 # Density as percentage
                 density_pct = float((pixel_count / roi_area) * 100)
@@ -467,10 +475,13 @@ class OmrEngine:
     # ──────────────────────────────────────────────────────────────
     #  MAIN — Full pipeline
     # ──────────────────────────────────────────────────────────────
-    def run(self, image_path, active_q=100, output_json=None, debug_output=None):
+    def run(self, image_path, active_q=100, output_json=None, debug_output=None, skip_align=False):
         print(f"[*] Processing: {image_path} | Active Q: {active_q}/100")
         img, gray, _ = self.preprocess(image_path)
-        warped = self.align_sheet(img, gray)
+        if skip_align:
+            warped = cv2.resize(img, (self.target_width, self.target_height))
+        else:
+            warped = self.align_sheet(img, gray)
         data, debug_img = self.extract_roi_data(warped, active_q=active_q)
 
         if output_json:
