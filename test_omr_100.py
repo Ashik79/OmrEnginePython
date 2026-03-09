@@ -28,7 +28,7 @@ def create_fake_omr_100():
     # ROLL number: 123456
     # Coordinates from engine: roll_start_x = 0.070, roll_start_y = 0.135, col_space = 0.048, row_space = 0.0182
     roll_start_x = 0.070
-    roll_start_y = 0.145
+    roll_start_y = 0.148
     roll_col_space = 0.048
     roll_row_space = 0.0182
     roll_digits = [1, 2, 3, 4, 5, 6]
@@ -43,10 +43,16 @@ def create_fake_omr_100():
     # q_start_y = 0.33, q_row_space = 0.024, gap_height = 0.006
     # col_base_x = [0.05, 0.285, 0.52, 0.755]
     # bx = width * (col_base_x + 0.08 + opt_idx * 0.038)
-    q_start_y = 0.345
-    q_row_space = 0.024
-    gap_height = 0.006
-    col_base_xs = [0.05, 0.285, 0.52, 0.755]
+    q_start_y = 0.342
+    q_row_space = 0.0248
+    gap_height = 0.003
+    # Column configurations from engine
+    col_configs = [
+        {"base_x": 0.050, "y_offset": 0},
+        {"base_x": 0.285, "y_offset": 0},
+        {"base_x": 0.520, "y_offset": -1}, # Sync with engine
+        {"base_x": 0.755, "y_offset": -1}, # Sync with engine
+    ]
     
     expected_answers = []
     
@@ -55,8 +61,11 @@ def create_fake_omr_100():
         row_idx = i % 25
         opt_idx = i % 4
         
-        col_base_x = col_base_xs[col_idx]
-        base_y = height * (q_start_y + row_idx * q_row_space + (row_idx // 5) * gap_height)
+        cfg = col_configs[col_idx]
+        col_base_x = cfg["base_x"]
+        col_y_offset = cfg["y_offset"]
+
+        base_y = height * (q_start_y + row_idx * q_row_space + (row_idx // 5) * gap_height) + col_y_offset
         
         bx = width * (col_base_x + 0.08 + opt_idx * 0.038)
         by = base_y

@@ -260,8 +260,8 @@ class OmrEngine:
         detected_set = self._process_set_section(thresh, debug_img)
 
         results = {
-            "set": detected_set,
-            "roll": self._process_roll_section(thresh, gray_warped, debug_img),
+            "set":       self._process_set_section(thresh, debug_img),
+            "roll":      self._process_roll_section(thresh, warped, debug_img),
             "questions": self._process_questions_section(thresh, debug_img, active_q=active_q)
         }
 
@@ -292,17 +292,19 @@ class OmrEngine:
         """
         Improved roll detection:
         - Adaptive threshold per column based on local background
-        - Stricter confidence ratio (top/second must be > 1.5x)
+        - Stricter confidence ratio (top/second must be > 1.2x)
         """
         roll = ""
         width  = self.target_width
         height = self.target_height
 
         roll_start_x   = 0.070
-        roll_start_y   = 0.145
+        roll_start_y   = 0.148  # Slightly adjusted from 0.145
         roll_col_space = 0.048
         roll_row_space = 0.0182
-        roi_r          = 7    # Smaller radius for smaller bubbles (17px diam)
+        roi_r          = 9      # Increased from 7 for better capture
+
+        print(f"[*] Roll detection debug (Y_start={roll_start_y}, ROI_R={roi_r})")
 
         for col in range(6):
             densities = []
@@ -324,21 +326,23 @@ class OmrEngine:
 
             # Adaptive minimum: use mean of nonzero as a baseline
             nonzero = [d for d in densities if d > 5]
-            dynamic_min = int(np.mean(nonzero) * 0.5) if nonzero else 25
+            dynamic_min = int(np.mean(nonzero) * 0.4) if nonzero else 15
 
             # Confident if: density above floor AND significantly higher than noise
             confident = (
-                max_d >= max(25, dynamic_min) and
-                (second_d == 0 or max_d / max(second_d, 1) >= 1.25)
+                max_d >= max(15, dynamic_min) and
+                (second_d == 0 or max_d / max(second_d, 1) >= 1.2)
             )
 
             if confident:
                 roll += str(max_row)
                 bx_f = int(width  * (roll_start_x + col * roll_col_space))
                 by_f = int(height * (roll_start_y + max_row * roll_row_space))
-                cv2.circle(debug_img, (bx_f, by_f), 7, (0, 255, 0), 2)
+                cv2.circle(debug_img, (bx_f, by_f), 10, (0, 255, 0), 2)
             else:
                 roll += "?"
+            
+            print(f"    Col {col}: max_row={max_row} (d={max_d}), sec_d={second_d}, ok={confident}")
 
         return roll
 
@@ -347,10 +351,10 @@ class OmrEngine:
     # ──────────────────────────────────────────────────────────────
     def _process_questions_section(self, thresh, debug_img, active_q=60):
         """
-        Improved bubble detection:
-        - Per-column background normalization (handles uneven lighting)
-        - Circularity check to reject pen strokes / stray marks
-        - Smarter empty (<25%) / valid (>55%) / multi-fill thresholds
+        Stable bubble detection (Optimized Alignment):
+        - Balanced row spacing and gap height
+        - High tolerance capture radius (15)
+        - Simple, robust density thresholding
         """
         extracted_answers = []
         width  = self.target_width
@@ -360,17 +364,17 @@ class OmrEngine:
         q_per_col  = 25
         total_q    = 100
 
-        q_start_y   = 0.345
-        q_row_space  = 0.024
-        gap_height   = 0.006  # extra gap every 5 questions
-        bubble_r     = 12      # bubble ROI half-size
+        q_start_y   = 0.342   # Baseline Y start
+        q_row_space  = 0.0248  # Optimized (slightly increased to reduce gap jump)
+        gap_height   = 0.003   # Optimized (slightly decreased to balance drift)
+        bubble_r     = 15      # Increased from 13 for much higher tolerance
 
-        # ── 4 columns positions: 5%, 28.5%, 52%, 75.5% (approx from image)
+        # ── Global Column Calibration (Optimized for 100-Q layout)
         col_configs = [
-            {"base_x": 0.05},
-            {"base_x": 0.285},
-            {"base_x": 0.52},
-            {"base_x": 0.755},
+            {"base_x": 0.050, "y_offset": 0},    # Col 1: Q1-25
+            {"base_x": 0.285, "y_offset": 0},    # Col 2: Q26-50
+            {"base_x": 0.520, "y_offset": -1},   # Col 3: Q51-75 (Slight lift)
+            {"base_x": 0.755, "y_offset": -1},   # Col 4: Q76-100 (Slight lift)
         ]
 
         for i in range(total_q):
@@ -378,9 +382,11 @@ class OmrEngine:
             row_idx = i % q_per_col
 
             col_base_x = col_configs[col_idx]["base_x"]
+            col_y_offset = col_configs[col_idx].get("y_offset", 0)
+            
             base_y = int(height * (
                 q_start_y + row_idx * q_row_space + (row_idx // 5) * gap_height
-            ))
+            )) + col_y_offset
 
             q_number = i + 1
             is_active = q_number <= active_q
@@ -402,11 +408,11 @@ class OmrEngine:
                 by = base_y
 
                 roi = thresh[
-                    max(0, by - bubble_r): by + bubble_r,
-                    max(0, bx - bubble_r): bx + bubble_r
+                    max(0, by - bubble_r): min(height, by + bubble_r),
+                    max(0, bx - bubble_r): min(width, bx + bubble_r)
                 ]
 
-                # ── Circular Masking: ignore noise outside the bubble radius
+                # ── Circular Masking
                 if roi.size > 0:
                     rr, cc = np.ogrid[:roi.shape[0], :roi.shape[1]]
                     center_y, center_x = roi.shape[0] // 2, roi.shape[1] // 2
@@ -422,12 +428,13 @@ class OmrEngine:
 
                 options_data.append({
                     "opt":         self.option_labels[opt_idx],
-                    "pixels":      pixel_count,
                     "density_pct": density_pct,
                     "bx":          bx,
                     "by":          by
                 })
-                cv2.rectangle(debug_img, (bx - bubble_r, by - bubble_r), (bx + bubble_r, by + bubble_r), (180, 180, 180), 1)
+                # VISUAL DEBUG
+                cv2.circle(debug_img, (bx, by), 2, (0, 0, 255), -1) 
+                cv2.rectangle(debug_img, (bx - bubble_r, by - bubble_r), (bx + bubble_r, by + bubble_r), (220, 220, 220), 1)
 
             # ── Sort by density
             sorted_opts = sorted(options_data, key=lambda x: x["density_pct"], reverse=True)
@@ -435,10 +442,10 @@ class OmrEngine:
             second_pct = sorted_opts[1]["density_pct"]
 
             # ── Decision logic (calibrated from density measurements)
-            EMPTY_THRESHOLD      = 4    # below this → truly empty (noise floor)
-            VALID_THRESHOLD      = 10   # above this → bubble filled
-            MULTI_SECOND_THRESH  = 8    # second option above this → possible multi-fill
-            CONFIDENCE_RATIO     = 1.5  # top must be 1.5x the second for valid
+            EMPTY_THRESHOLD      = 2.5  # Further reduced for maximum sensitivity
+            VALID_THRESHOLD      = 6    # Further reduced
+            MULTI_SECOND_THRESH  = 5    # Further reduced
+            CONFIDENCE_RATIO     = 1.3  # Reduced to accept slightly off-center fills
 
             is_empty = float(top_pct) < float(EMPTY_THRESHOLD)
             is_multi_fill = (
@@ -469,7 +476,16 @@ class OmrEngine:
                 "errorType":  "MULTIPLE_FILL" if is_multi_fill else ("EMPTY" if is_empty else None)
             })
 
-        print(f"[+] Evaluated {active_q} of 100 questions. {100 - active_q} SKIPPED_INACTIVE.")
+            # Debug log for problematic questions
+            if q_number >= 11 and q_number <= 20:
+                print(f"    Q{q_number}: top={sorted_opts[0]['opt']}({top_pct:.1f}%), sec={sorted_opts[1]['opt']}({second_pct:.1f}%), status={status}")
+
+            # Debug log for all questions (verbose in terminal for optimization)
+            if top_pct < EMPTY_THRESHOLD:
+                # Optionally log skipped/empty questions if needed
+                pass
+
+        print(f"[+] Evaluated {active_q} questions. Bubble centers visualized in debug image.")
         return extracted_answers
 
     # ──────────────────────────────────────────────────────────────
