@@ -298,11 +298,11 @@ class OmrEngine:
         width  = self.target_width
         height = self.target_height
 
-        roll_start_x   = 0.070
-        roll_start_y   = 0.148  # Slightly adjusted from 0.145
-        roll_col_space = 0.048
+        roll_start_x   = 0.052  # Calibrated for high-res phone photos
+        roll_start_y   = 0.142  # Calibrated
+        roll_col_space = 0.0504 # Calibrated
         roll_row_space = 0.0182
-        roi_r          = 9      # Increased from 7 for better capture
+        roi_r          = 10     # Increased for better bubble capture
 
         print(f"[*] Roll detection debug (Y_start={roll_start_y}, ROI_R={roi_r})")
 
