@@ -42,6 +42,20 @@ class OmrEngine:
                 print(f"[-] YOLOv8 load failed: {e}")
                 self.yolo_model = None
 
+        # Pre-calculate circular masks for speed
+        self.bubble_r = 15
+        self.roll_r = 10
+        
+        # Bubble mask
+        by, bx = np.ogrid[:self.bubble_r*2, :self.bubble_r*2]
+        self.bubble_mask = (by - self.bubble_r)**2 + (bx - self.bubble_r)**2 <= (self.bubble_r-1)**2
+        self.bubble_mask_area = int(np.sum(self.bubble_mask))
+        
+        # Roll mask
+        ry, rx = np.ogrid[:self.roll_r*2, :self.roll_r*2]
+        self.roll_mask = (ry - self.roll_r)**2 + (rx - self.roll_r)**2 <= (self.roll_r-1)**2
+        self.roll_mask_area = int(np.sum(self.roll_mask))
+
     # ──────────────────────────────────────────────────────────────
     #  STEP 1 — Preprocess
     # ──────────────────────────────────────────────────────────────
@@ -298,10 +312,10 @@ class OmrEngine:
         width  = self.target_width
         height = self.target_height
 
-        roll_start_x   = 0.052  # Calibrated for high-res phone photos
-        roll_start_y   = 0.142  # Calibrated
-        roll_col_space = 0.0504 # Calibrated
-        roll_row_space = 0.0182
+        roll_start_x   = 0.070  # Sync with PremiumOmrSheet.jsx (7.0%)
+        roll_start_y   = 0.145  # Sync with PremiumOmrSheet.jsx (14.5%)
+        roll_col_space = 0.048  # Sync with PremiumOmrSheet.jsx (4.8%)
+        roll_row_space = 0.0182 # 1.82%
         roi_r          = 10     # Increased for better bubble capture
 
         print(f"[*] Roll detection debug (Y_start={roll_start_y}, ROI_R={roi_r})")
@@ -313,10 +327,13 @@ class OmrEngine:
                 by = int(height * (roll_start_y + row * roll_row_space))
 
                 roi = thresh[
-                    max(0, by - roi_r): by + roi_r,
-                    max(0, bx - roi_r): bx + roi_r
+                    max(0, by - self.roll_r): by + self.roll_r,
+                    max(0, bx - self.roll_r): bx + self.roll_r
                 ]
-                d = cv2.countNonZero(roi)
+                if roi.shape == (self.roll_r*2, self.roll_r*2):
+                    d = cv2.countNonZero(cv2.bitwise_and(roi, roi, mask=self.roll_mask.astype(np.uint8)))
+                else:
+                    d = cv2.countNonZero(roi)
                 densities.append(d)
                 cv2.rectangle(debug_img, (bx - roi_r, by - roi_r), (bx + roi_r, by + roi_r), (150, 150, 150), 1)
 
@@ -364,9 +381,9 @@ class OmrEngine:
         q_per_col  = 25
         total_q    = 100
 
-        q_start_y   = 0.342   # Baseline Y start
-        q_row_space  = 0.0248  # Optimized (slightly increased to reduce gap jump)
-        gap_height   = 0.003   # Optimized (slightly decreased to balance drift)
+        q_start_y   = 0.345   # Sync with PremiumOmrSheet.jsx (34.5%)
+        q_row_space  = 0.024   # Sync with PremiumOmrSheet.jsx (2.4%)
+        gap_height   = 0.006   # Sync with PremiumOmrSheet.jsx (0.6%)
         bubble_r     = 15      # Increased from 13 for much higher tolerance
 
         # ── Global Column Calibration (Optimized for 100-Q layout)
@@ -412,13 +429,13 @@ class OmrEngine:
                     max(0, bx - bubble_r): min(width, bx + bubble_r)
                 ]
 
-                # ── Circular Masking
-                if roi.size > 0:
-                    rr, cc = np.ogrid[:roi.shape[0], :roi.shape[1]]
-                    center_y, center_x = roi.shape[0] // 2, roi.shape[1] // 2
-                    mask = (rr - center_y)**2 + (cc - center_x)**2 <= (bubble_r-1)**2
-                    pixel_count = int(cv2.countNonZero(roi[mask]))
-                    roi_area = int(np.sum(mask))
+                # ── Optimized Circular Masking using pre-calculated mask
+                if roi.shape == (self.bubble_r*2, self.bubble_r*2):
+                    pixel_count = int(cv2.countNonZero(cv2.bitwise_and(roi, roi, mask=self.bubble_mask.astype(np.uint8))))
+                    roi_area = self.bubble_mask_area
+                elif roi.size > 0:
+                    pixel_count = int(cv2.countNonZero(roi))
+                    roi_area = roi.size
                 else:
                     pixel_count = 0
                     roi_area = 1
